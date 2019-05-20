@@ -41,6 +41,9 @@ class Location(models.Model):
 
 
 class Transition(models.Model):
+    game = models.ForeignKey(Game, on_delete=models.CASCADE, null=True,
+                             related_name='transitions',
+                             verbose_name=_('Game'))
     source = models.ForeignKey(Location, on_delete=models.CASCADE,
                                related_name='source_transitions',
                                verbose_name=_('source location'))
@@ -62,8 +65,18 @@ class Transition(models.Model):
         verbose_name_plural = _('Transitions')
 
     def clean(self):
+        if self.source.game != self.target.game:
+            raise ValidationError({
+                'source': _('Should have same game relation'),
+                'target': _('Should have same game relation')
+            })
         if self.source == self.target:
             raise ValidationError({
                 'source': _('Cannot use same `source` and `target`'),
                 'target': _('Cannot use same `source` and `target`')
             })
+
+    def save(self, *args, **kwargs):
+        if self._state.adding:
+            self.game_id = self.target.game_id
+        super().save(*args, **kwargs)
