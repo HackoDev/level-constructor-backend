@@ -10,7 +10,7 @@ class GameSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Game
-        fields = ('id', 'title', 'description', 'locations')
+        fields = ('id', 'title', 'description', 'locations', 'initial_state')
 
 
 class GameExtendedSerializer(serializers.ModelSerializer):
@@ -26,4 +26,7 @@ class GameExtendedSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Game
-        fields = ('id', 'title', 'description', 'locations', 'visualization')
+        fields = (
+            'id', 'title', 'description', 'locations', 'visualization',
+            'initial_state'
+        )

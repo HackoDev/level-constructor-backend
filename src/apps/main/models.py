@@ -1,6 +1,8 @@
 from django.core.exceptions import ValidationError
+from solo.models import SingletonModel
 
 __all__ = [
+    'Config',
     'Game',
     'Location',
     'Transition'
@@ -11,9 +13,19 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 
+class Config(SingletonModel):
+    bool_expression_rules = models.TextField(_('bool expression rules'))
+    state_expression_rules = models.TextField(_('state expression rules'))
+
+    class Meta:
+        verbose_name = _('config')
+
+
 class Game(models.Model):
     title = models.CharField(_('title'), max_length=256)
     description = models.TextField(_('title'))
+    initial_state = JSONField(_('initial state (rules)'), default=dict,
+                              blank=True)
 
     def __str__(self):
         return self.title
@@ -50,8 +62,23 @@ class Transition(models.Model):
     target = models.ForeignKey(Location, on_delete=models.CASCADE,
                                related_name='target_transitions',
                                verbose_name=_('target location'))
-    condition = JSONField(_('condition'), blank=True, default=dict)
-    state = JSONField(_('state'), blank=True, default=dict)
+
+    # human readable rules
+    condition = models.CharField(
+        _('condition (readable)'), blank=True, max_length=1024
+    )
+    state = JSONField(
+        _('statement (readable)'), blank=True, default=dict
+    )
+
+    # json structured rules
+    condition_rules = JSONField(
+        _('condition (rules)'), blank=True, default=dict
+    )
+    state_rules = JSONField(
+        _('state (rules)'), blank=True, default=dict
+    )
+
     position = models.PositiveIntegerField(_('position'))
     weight = models.PositiveIntegerField(_('weight'))
     is_visible = models.BooleanField(_('is visible'))

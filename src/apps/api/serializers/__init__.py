@@ -4,3 +4,4 @@ from .games import GameSerializer
 from .games import GameExtendedSerializer
 from .users import UserSerializer
 from .auth import AuthSerializer
+from .config import ConfigSerializer

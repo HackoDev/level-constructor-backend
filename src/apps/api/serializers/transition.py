@@ -7,6 +7,8 @@ class TransitionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transition
         fields = (
-            'id', 'source', 'target', 'condition', 'state', 'position',
-            'weight', 'is_visible', 'meta'
+            'id', 'source', 'target', 'position',
+            'weight', 'is_visible', 'meta',
+            'condition', 'state',
+            'condition_rules', 'state_rules'
         )
