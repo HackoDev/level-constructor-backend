@@ -1,4 +1,6 @@
 from django.core.exceptions import ValidationError
+from django.db.models.signals import post_save
+from model_utils.choices import Choices
 from solo.models import SingletonModel
 
 __all__ = [
@@ -36,12 +38,17 @@ class Game(models.Model):
 
 
 class Location(models.Model):
+    TYPE_CHOICES = Choices(
+        (0, 'DEFAULT', _('Default')),
+        (1, 'START', _('Is Start')),
+        (2, 'Finish', _('Is Finish')),
+    )
     game = models.ForeignKey(Game, on_delete=models.CASCADE,
                              related_name='locations')
     name = models.CharField(_('name'), max_length=512)
     description = models.TextField(_('description'), max_length=512)
-    is_start = models.BooleanField(_('is start'))
-    is_finish = models.BooleanField(_('is finish'))
+    type = models.SmallIntegerField(_('type'), choices=TYPE_CHOICES,
+                                    default=TYPE_CHOICES.DEFAULT)
     meta = JSONField(_('meta'), default=dict, blank=True)
 
     def __str__(self):
@@ -107,3 +114,14 @@ class Transition(models.Model):
         if self._state.adding:
             self.game_id = self.target.game_id
         super().save(*args, **kwargs)
+
+
+def set_is_start_value(instance, **kwargs):
+    if instance.type == Location.TYPE_CHOICES.START:
+        instance.game.locations\
+            .exclude(id=instance.id)\
+            .filter(type=Location.TYPE_CHOICES.START)\
+            .update(type=Location.TYPE_CHOICES.DEFAULT)
+
+
+post_save.connect(set_is_start_value, sender=Location)

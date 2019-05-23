@@ -8,4 +8,4 @@ class LocationFilter(filters.FilterSet):
 
     class Meta:
         model = Location
-        fields = ('game', 'is_start', 'is_finish')
+        fields = ('game', 'type')
